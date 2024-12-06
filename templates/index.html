@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            padding-top: 50px;
+        }
+
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="number"],
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Predict Transport Type</h1>
+
+    <div class="container">
+        <form id="prediction-form" action="/predict" method="POST">
+            
+            <div class="form-group">
+                <label for="average_speed">Average Speed (km/h):</label>
+                <input type="number" id="average_speed" name="average_speed" step="any" required>
+            </div>
+
+            <div class="form-group">
+                <label for="traffic_density">Traffic Density:</label>
+                <input type="number" id="traffic_density" name="traffic_density" step="any" required>
+            </div>
+
+            <div class="form-group">
+                <label for="temperature">Temperature (°C):</label>
+                <input type="number" id="temperature" name="temperature" step="any" required>
+            </div>
+
+            <div class="form-group">
+                <label for="wind_speed">Wind Speed (km/h):</label>
+                <input type="number" id="wind_speed" name="wind_speed" step="any" required>
+            </div>
+
+            <div class="form-group">
+                <label for="distance_km">Distance (km):</label>
+                <input type="number" id="distance_km" name="distance_km" step="any" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hour">Hour of Day (24-hour format):</label>
+                <input type="number" id="hour" name="hour" min="0" max="23" required>
+            </div>
+
+            <div class="form-group">
+                <label for="weather_condition">Weather Condition:</label>
+                <select id="weather_condition" name="weather_condition" required>
+                    <option value="Sunny">Clear</option>
+                    <option value="Rainy">Rainy</option>
+                    <option value="Snowy">Snowy</option>
+                    <option value="Cloudy">Cloudy</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="incident_type">Incident Type:</label>
+                <select id="incident_type" name="incident_type" required>
+                    <option value="None">None</option>
+                    <option value="Accident">Accident</option>
+                    <option value="Roadwork">Roadwork</option>
+                    <option value="Closure">Closure</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="day_of_week">Day of the Week:</label>
+                <input type="number" id="day_of_week" name="day_of_week" min="0" max="6" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="precipitation">Precipitation (mm):</label>
+                <input type="number" id="precipitation" name="precipitation" step="any" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="event_type">Event Type:</label>
+                <select id="event_type" name="event_type" required>
+                    <option value="sport">Sport</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="incident_severity">Incident Severity:</label>
+                <input type="number" id="incident_severity" name="incident_severity" min="0" max="5" required>
+            </div>
+            
+            <button type="submit">Predict</button>
+        </form>
+    </div>
+
+    <script>
+            document.getElementById('prediction-form').onsubmit = function(event) {
+            event.preventDefault();  // Prevent the default form submission
+
+            // Get the values from the form inputs
+            let average_speed = document.getElementById('average_speed').value;
+            let traffic_density = document.getElementById('traffic_density').value;
+            let temperature = document.getElementById('temperature').value;
+            let wind_speed = document.getElementById('wind_speed').value;
+            let distance_km = document.getElementById('distance_km').value;
+            let hour = document.getElementById('hour').value;
+            let weather_condition = document.getElementById('weather_condition').value;
+            let incident_type = document.getElementById('incident_type').value;
+            let day_of_week = document.getElementById('day_of_week').value;
+            let precipitation = document.getElementById('precipitation').value;
+            let event_type = document.getElementById('event_type').value;
+            let incident_severity = document.getElementById('incident_severity').value;
+
+            // Ensure all the fields have values
+            if (average_speed === "" || traffic_density === "" || temperature === "" || wind_speed === "" || distance_km === "" || hour === "" || precipitation === "" || day_of_week === "" || incident_severity === "") {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            // Convert form values to numbers
+            average_speed = parseFloat(average_speed) || 0;
+            traffic_density = parseFloat(traffic_density) || 0;
+            temperature = parseFloat(temperature) || 0;
+            wind_speed = parseFloat(wind_speed) || 0;
+            distance_km = parseFloat(distance_km) || 0;
+            hour = parseInt(hour) || 0;
+            day_of_week = parseInt(day_of_week) || 0;
+            precipitation = parseFloat(precipitation) || 0;
+            incident_severity = parseInt(incident_severity) || 0;
+
+            // If incident type is "None", set incident severity to 0
+            if (incident_type === "None") {
+                incident_severity = 0;
+            }
+
+            // Weather condition encoding (4 options)
+            let encoded_weather = [0, 0, 0, 0];  // Ensure 4 elements for the weather condition
+            if (weather_condition === "Clear") encoded_weather[0] = 1;
+            else if (weather_condition === "Rainy") encoded_weather[1] = 1;
+            else if (weather_condition === "Snowy") encoded_weather[2] = 1;
+            else if (weather_condition === "Cloudy") encoded_weather[3] = 1;
+
+            // Incident type encoding (4 options)
+            let encoded_incident = [0, 0, 0, 0];  // Ensure 4 elements for the incident type
+            if (incident_type === "None") encoded_incident[0] = 1;
+            else if (incident_type === "Accident") encoded_incident[1] = 1;
+            else if (incident_type === "Roadwork") encoded_incident[2] = 1;
+            else if (incident_type === "Closure") encoded_incident[3] = 1;
+
+            // Event type encoding (add this encoding if necessary)
+            let encoded_event_type = (event_type === "sport") ? 1 : 0;  // assuming sport is the only option
+
+            // Construct the feature array (18 features in total)
+            let features = [
+                average_speed, traffic_density, temperature, wind_speed, distance_km, hour,
+                ...encoded_weather,  // 4 encoded weather features
+                ...encoded_incident,  // 4 encoded incident features
+                day_of_week,  // Add this feature
+                precipitation,  // Add this feature
+                encoded_event_type,  // Add event type encoding
+                incident_severity  // Add incident severity
+            ];
+
+            // Send data as JSON using fetch
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ features: features }) // Send the features as JSON
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.prediction) {
+                // Check if the prediction is an array and access the first value
+                let predictionResult = Array.isArray(data.prediction) ? data.prediction[0] : data.prediction;
+                alert('Prediction result: ' + predictionResult);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred.');
+        });
+        };
+
+
+    </script>
+</body>
+</html>
